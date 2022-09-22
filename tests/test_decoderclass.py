@@ -10,28 +10,31 @@ class Decodr(AndroidDecoder):
     TARGET = 'data.db'
     NAMESPACE = 'db'
     PACKAGE = 'com.myapp'
+    template_name = 'test_messages.html'
+    title = 'Test Messages'
+    headers = {
+        '_id': 'Index',
+        'name': 'Name',
+        'number': 'Number',
+        'message': 'Message',
+        'timestamp': 'Time',
+        'status': 'status',
+        'type': 'type',
+        'duration': 'duration',
+    }
 
     def __init__(self, work_dir, input_file, **kwargs):
         super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'test_messages.html'
-        self.title = 'Test Messages'
-        self.Titles = {
-            '_id': 'Index',
-            'name': 'Name',
-            'number': 'Number',
-            'message': 'Message',
-            'timestamp': 'Time',
-            'status': 'status',
-            'type': 'type',
-            'duration': 'duration',
-        }
         self.add_extra('f', 'some.xml')
+
+    def main(self):
+        pass
 
 
 @pytest.fixture
 def Deco(conf):
-    work_dir = tempfile.NamedTemporaryFile()
-    input_file = tempfile.TemporaryFile()
+    work_dir = tempfile.TemporaryDirectory()
+    input_file = tempfile.NamedTemporaryFile()
     dec = Decodr(work_dir.name, input_file.name)
     return dec
 
@@ -39,8 +42,8 @@ def Deco(conf):
 @pytest.fixture
 def DecoTZ(conf):
     conf.update_conf(**{conf.NS: {'time_zone': 'UTC-05:00'}})
-    work_dir = tempfile.NamedTemporaryFile()
-    input_file = tempfile.TemporaryFile()
+    work_dir = tempfile.TemporaryDirectory()
+    input_file = tempfile.NamedTemporaryFile()
     dec = Decodr(work_dir.name, input_file.name)
     return dec
 
@@ -54,10 +57,19 @@ def DecoFile(Deco):
     return Deco
 
 
+def test_input_path_no_change(Deco):
+    assert Deco.input_file.endswith('some.xml') is False
+
+
 def test_paths(Deco):
     assert Deco.target_path_ab == 'apps/com.myapp/db/data.db'
     assert Deco.target_path_root == '/data/data/com.myapp/databases/data.db'
     assert Deco.target_path_posix == 'com.myapp/*/data.db'
+
+
+def test_extra_paths(Deco):
+    extras = Deco.get_extras()
+    assert '/data/data/com.myapp/files/some.xml' in extras
 
 
 def test_init_data(Deco):

@@ -2,9 +2,11 @@
 import os
 import sys
 
+app_name = 'AndrillerCE'
 block_cipher = None
 
 ONE_FILE = False if sys.platform == 'win32' else True
+DEBUG = False
 
 
 def get_binaries():
@@ -61,18 +63,18 @@ if ONE_FILE:
         a.datas,
         [],
         name='andriller',
-        debug=False,
+        debug=DEBUG,
         bootloader_ignore_signals=False,
         strip=False,
         upx=True,
         runtime_tmpdir=None,
-        console=False,
+        console=DEBUG,
         icon=os.path.join('andriller', 'res', get_icon()),
     )
     if sys.platform == 'darwin':
         app = BUNDLE(
             exe,
-            name='Andriller.app',
+            name=f'{app_name}.app',
             icon='andriller/res/icon3.icns',
             bundle_identifier=None)
 else:
@@ -91,5 +93,5 @@ else:
         icon=os.path.join('andriller', 'res', get_icon()),
     )
     coll = COLLECT(
-        exe, a.binaries, a.zipfiles, a.datas, strip=False, upx=True, name='andriller'
+        exe, a.binaries, a.zipfiles, a.datas, strip=False, upx=True, name=app_name
     )
